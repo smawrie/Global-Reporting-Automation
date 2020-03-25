@@ -1,0 +1,91 @@
+--
+title: "Global reporting automation"
+author: "Somya Mawrie"
+date: '2020-03-25'
+output:
+  html_document:
+    df_print: paged
+    toc: yes
+  html_notebook:
+    toc: yes
+always_allow_html: yes
+---
+
+Data Wrangling
+============================
+
+The purpose of this code is to wrangle the data and create a means to move forward.
+
+
+```{r}
+clean_data <- read.csv(file="x.csv", header=TRUE)
+clean_data
+```
+
+
+
+## Selection of Data and Tidying
+
+#Remove columns not needed, reaggregate data in a cleaner format, filtering accordingly.
+
+```{r}
+library(tidyr)
+library(dplyr)
+library(tidyverse)
+##Convert CDI data to tibble format
+CD <- as_tibble(clean_data)
+CD <- filter(CD, DataValueType == "x")
+##Select variables
+CD <- select(x, y, z, a, b, c) 
+##Filter based on Data Type
+clean <- data1 %>% 
+  dplyr::filter((x | y) %>%
+  unite(Combined, x, y, z ) %>% 
+  spread(data1, key="Combined", value = "DataValue", convert = FALSE)
+##Rename variables. Convert to numeric. 
+colnames(clean)[1] <- x
+colnames(clean)[2] <- y
+colnames(clean)[3] <- y
+
+clean_data
+##Save clean table as CSV
+write.table(CD, file = "final_clean.csv")
+```
+
+
+## Data Transformation and Summary Results
+
+
+
+```{r}
+##Convert to dataframe
+data <- as.data.frame(CD)
+##Create new table - filter on key elements, arrange by binge all, select top ten variables
+updated_table <- data %>% select(x, y, z) %>%
+  filter(Year=="2020") %>%
+  arrange(desc(x)) %>%
+   top_n(10, x)
+#Print table
+updated_table
+```
+
+
+Calculate summary stats 
+
+```{r}
+data
+data <- na.omit(data)
+##run summary calculation
+growth <- data %>% group_by() %>%
+  summarize(average_annual_growth = 100*(last(x) - first(y))/first(z))
+  
+##organize summary calculation by magnitude of calculation
+top5_increase <- growth %>%
+  arrange(desc(x)) %>%
+   top_n(5, y)
+top5_increase
+top5_decrease <- growth %>%
+  arrange((x)) %>%
+   top_n(-5, y)
+top5_decrease
+```
