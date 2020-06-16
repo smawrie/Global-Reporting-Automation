@@ -1,0 +1,59 @@
+---
+title: "Benchmark Generation"
+output: html_notebook
+---
+
+The purpose of this file is to generate benchmarks from a raw data file. To ensure that the process is set up for success, we need to 
+make sure that the file is set up to contain all the fields and that these are properly labeled. Once the file is set up cleanly, 
+we can go ahead and set up the 
+
+```{r}
+
+##Get working directory - where are your documents being saved?
+getwd()
+
+##Load Library
+library (dplyr)
+
+##Load input file. Note: must be inputted as a raw CSV
+input_file <- read.csv("DUO.csv", header=T)
+
+##Create your data-frame. How? Identify the fields you need data parsed by. Then identify the volume metrics you need to pull in to 
+##pull benchmarks. 
+
+v1 <- input_file %>%
+  select(Market, Partner, Primary_KPI, Creative.Format, Creative.Type, Impressions, Clicks, Cost, Engagements, Video.Completions) %>%
+  group_by(Market, Partner, Primary_KPI, Creative.Format, Creative.Type) %>%
+  summarise_all(funs(sum))
+
+
+
+##Calculate the benchmarks by adding new columns to the existing data frame andwrangling the metrics as needed
+benchmarks <- v1 %>%
+  mutate(CTR = Clicks/Impressions) %>%
+  mutate(CPC = Cost/Clicks) %>%
+  mutate (Engagement_Rate = Engagements/Impressions) %>%
+  mutate (VCR = Video.Completions/Impressions) %>%
+  mutate (CPM = Cost/(Impressions/1000)) %>%
+  mutate (CPE = Cost/Engagements) %>%
+  mutate (CPCV = Cost/Video.Completions)
+
+
+##Create the final dataframe
+input_final <- benchmarks %>%
+  select(Market, Partner, Primary_KPI,  Creative.Format, Creative.Type, Clicks, Impressions, Cost, CTR, VCR, CPC, Engagement_Rate, VCR, CPM, CPE, CPCV) %>%
+  group_by(Market, Primary_KPI, Partner, Creative.Format, Creative.Type)
+
+##Check the dataframe
+input_final
+
+##Save it as a CSV. NOTE: This will save to whatever your working directory is.
+write.csv(input_final, "1duo_benchmarks_6.9.20.csv")
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
